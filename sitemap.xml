@@ -102,13 +102,6 @@
 
   
   <url>
-    <loc>http://www.gsheller.top/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/</loc>
-    <lastmod>2021-03-01</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://www.gsheller.top/tags/%E6%BC%8F%E6%B4%9E%E6%8E%A8%E9%80%81/</loc>
     <lastmod>2021-03-01</lastmod>
     <changefreq>daily</changefreq>
@@ -116,7 +109,7 @@
   </url>
   
   <url>
-    <loc>http://www.gsheller.top/tags/bypass/</loc>
+    <loc>http://www.gsheller.top/tags/%E5%AE%89%E5%85%A8%E7%A0%94%E7%A9%B6/</loc>
     <lastmod>2021-03-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -124,6 +117,13 @@
   
   <url>
     <loc>http://www.gsheller.top/tags/web%E6%B8%97%E9%80%8F/</loc>
+    <lastmod>2021-03-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://www.gsheller.top/tags/bypass/</loc>
     <lastmod>2021-03-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
